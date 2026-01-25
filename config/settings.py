@@ -11,6 +11,27 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
+os.environ["PATH"] = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin;" + os.environ.get("PATH", "")
+GDAL_LIBRARY_PATH = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
+
+import dj_database_url
+
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
+if os.environ.get("DATABASE_URL"):
+    DATABASES["default"] = dj_database_url.parse(
+        os.environ["DATABASE_URL"],
+        conn_max_age=600,
+        ssl_require=True,
+    )
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +44,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i_2jpsiaw@j1c%3jmeh*u1ylucvcdbg884=)p04=bck^1%az0m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+import os
+DEBUG = os.environ.get("DEBUG", "1") == "1"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-ALLOWED_HOSTS = []
+
+#DEBUG = True
+
+#ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -46,7 +72,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
 
     # Your apps (use real folder names)
-    "guide",   # ← you definitely have this
+    "guide",
 ]
 
 MIDDLEWARE = [
@@ -82,17 +108,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "lolo_guide",
-        "USER": "postgres",
-        "PASSWORD": "lolo",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
-        "OPTIONS": {"options": "-c search_path=public"},
-    }
-}
+
 
 
 # Password validation
