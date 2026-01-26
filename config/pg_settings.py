@@ -4,9 +4,11 @@ import os
 
 import dj_database_url
 # Make OSGeo4W DLLs discoverable (GeoDjango / PostGIS)
-os.environ["PATH"] = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin;" + os.environ.get("PATH", "")
-GDAL_LIBRARY_PATH = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
-GEOS_LIBRARY_PATH = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"  # ensure this file exists
+
+if sys.platform == "win32":
+    os.environ["PATH"] = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin;" + os.environ.get("PATH", "")
+    GDAL_LIBRARY_PATH = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
+    GEOS_LIBRARY_PATH = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
 
 # Default local DB (works without env vars)
 import os
