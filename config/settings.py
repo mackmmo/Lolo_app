@@ -50,15 +50,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i_2jpsiaw@j1c%3jmeh*u1ylucvcdbg884=)p04=bck^1%az0m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-import os
-DEBUG = os.environ.get("DEBUG", "1") == "1"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-
-
-#DEBUG = True
-
-#ALLOWED_HOSTS = []
-
+DEBUG = False
+ALLOWED_HOSTS = [
+    "lolo-app-1.onrender.com",
+]
 
 # Application definition
 
