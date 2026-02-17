@@ -17,8 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from guide.views import SectorListView
 from django.urls import path, include
+from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
     path('', views.home),
+    path('sectors/', views.SectorListView.as_view(), name='sectors-list')
+]
