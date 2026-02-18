@@ -3,12 +3,12 @@ from rest_framework import generics
 from .models import Sector
 from .serializers import SectorSerializer
 from django.http import JsonResponse
-from django.http import JsonResponse
 from django.views import View
 
-class SectorListView(View):
-    def get(self, request):
-        return JsonResponse({"message": "Sectors view works"})
+class SectorListView(generics.ListAPIView):
+    queryset = Sector.objects.all().order_by('sector_id')
+    serializer_class = SectorSerializer
+
 def db_debug(request):
     try:
         sector_count = Sector.objects.count()
