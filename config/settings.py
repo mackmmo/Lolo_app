@@ -14,19 +14,16 @@ import dj_database_url
 import os
 import sys
 
+# Only set GDAL_LIBRARY_PATH/GEOS_LIBRARY_PATH if running locally on Windows
 if sys.platform == "win32":
-    conda_bin = os.path.join(sys.prefix, "Library", "bin")
-    os.environ["PATH"] = conda_bin + ";" + os.environ.get("PATH", "")
-
-# 👇 These must be Django settings, NOT os.environ
-GDAL_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\gdal.dll"
-GEOS_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\geos_c.dll"
+    GDAL_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\gdal.dll"
+    GEOS_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\geos_c.dll"
 
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
-        ssl_require=False,
+        ssl_require=True,
     )
 }
 
