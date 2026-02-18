@@ -14,19 +14,30 @@ import dj_database_url
 import os
 import sys
 
-# Only set GDAL_LIBRARY_PATH/GEOS_LIBRARY_PATH if running locally on Windows
-if sys.platform == "win32":
-    GDAL_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\gdal.dll"
-    GEOS_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\geos_c.dll"
 
+ENV = os.environ.get("DJANGO_ENV", "local")  # default to local
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=os.environ.get("RENDER") is not None,  # SSL only in Render
-    )
-}
+if ENV == "local":
+    # Use local Postgres database
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "lolo_local_db",
+            "USER": "postgres",
+            "PASSWORD": "your_local_password",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
+    }
+else:
+    # Production (Render)
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
 
 
 
