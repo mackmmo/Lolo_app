@@ -16,10 +16,15 @@ import dj_database_url
 import sys
 
 if sys.platform == "win32":
-    os.environ["PATH"] = r"C:\Users\moore\AppData\Local\Programs\OSGeo4W\bin;" + os.environ.get("PATH", "")
-    os.environ["GDAL_LIBRARY_PATH"] = r"C:\Users\moore\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
-    os.environ["GEOS_LIBRARY_PATH"] = r"C:\Users\moore\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
+    # Prepend Conda env bin folder to PATH
+    conda_bin = os.path.join(sys.prefix, "Library", "bin")
+    os.environ["PATH"] = conda_bin + ";" + os.environ.get("PATH", "")
+
+    # GDAL/GEOS from Conda environment
+    os.environ["GDAL_LIBRARY_PATH"] = os.path.join(conda_bin, "gdal312.dll")
+    os.environ["GEOS_LIBRARY_PATH"] = os.path.join(conda_bin, "geos_c.dll")
 else:
+    # make sure we DON'T carry Windows values in production
     os.environ.pop("GDAL_LIBRARY_PATH", None)
     os.environ.pop("GEOS_LIBRARY_PATH", None)
 
