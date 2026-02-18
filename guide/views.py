@@ -1,23 +1,15 @@
 # guide/views.py
-from django.http import JsonResponse
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import Sector
-
-# Example DRF view you already have
-from .serializers import SectorSerializer
 from rest_framework import generics
+from .models import Sector
+from .serializers import SectorSerializer
+from django.http import JsonResponse
+from django.http import JsonResponse
+from django.views import View
 
-class SectorListView(generics.ListAPIView):
-    queryset = Sector.objects.all().order_by('sector_id')
-    serializer_class = SectorSerializer
-
-
-# Add this db_debug view
+class SectorListView(View):
+    def get(self, request):
+        return JsonResponse({"message": "Sectors view works"})
 def db_debug(request):
-    """
-    Simple view to check DB connection and list sector count.
-    """
     try:
         sector_count = Sector.objects.count()
         return JsonResponse({"status": "ok", "sector_count": sector_count})
