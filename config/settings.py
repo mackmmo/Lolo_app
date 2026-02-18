@@ -31,12 +31,7 @@ DATABASES = {
         ssl_require=True,
     )
 }
-if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.parse(
-        os.environ["DATABASE_URL"],
-        conn_max_age=600,
-        ssl_require=True,
-    )
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,6 +69,7 @@ INSTALLED_APPS = [
 
     # Your apps (use real folder names)
     "guide",
+    "api"
 ]
 
 MIDDLEWARE = [
