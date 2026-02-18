@@ -19,11 +19,12 @@ if sys.platform == "win32":
     GDAL_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\gdal.dll"
     GEOS_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\geos_c.dll"
 
+
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
-        ssl_require=True,
+        ssl_require=os.environ.get("RENDER") is not None,  # SSL only in Render
     )
 }
 
