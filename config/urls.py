@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from guide import views  # <-- FIXED
+from guide.views import SectorListView, db_debug  # import the view
+from api.views import ExampleAPIView
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", include("api.urls")),
-    path("db-debug/", views.db_debug),
+    path('admin/', admin.site.urls),
+    path('sectors/', SectorListView.as_view(), name='sector-list'),
+    path('db-debug/', db_debug, name='db-debug'),
+    path('api/', include('api.urls')),  # include API URLs
 ]
