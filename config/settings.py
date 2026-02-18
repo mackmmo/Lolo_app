@@ -17,18 +17,16 @@ import sys
 if sys.platform == "win32":
     conda_bin = os.path.join(sys.prefix, "Library", "bin")
     os.environ["PATH"] = conda_bin + ";" + os.environ.get("PATH", "")
-    os.environ["GDAL_LIBRARY_PATH"] = os.path.join(conda_bin, "gdal.dll")
-    os.environ["GEOS_LIBRARY_PATH"] = os.path.join(conda_bin, "geos_c.dll")
-else:
-    # for non-Windows, remove any Windows-specific paths
-    os.environ.pop("GDAL_LIBRARY_PATH", None)
-    os.environ.pop("GEOS_LIBRARY_PATH", None)
+
+# 👇 These must be Django settings, NOT os.environ
+GDAL_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\gdal.dll"
+GEOS_LIBRARY_PATH = r"C:\Users\moore\anaconda3\envs\lolo-env\Library\bin\geos_c.dll"
 
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
-        ssl_require=True,
+        ssl_require=False,
     )
 }
 
