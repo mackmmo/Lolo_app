@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=C:\Users\basel\Lolo_app\lolo_guidebook_be\venv"
+set VIRTUAL_ENV=C:\Users\moore\lolo-app-repo\Lolo_app\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
@@ -24,8 +24,7 @@ set PYTHONHOME=
 if defined _OLD_VIRTUAL_PATH set PATH=%_OLD_VIRTUAL_PATH%
 if not defined _OLD_VIRTUAL_PATH set _OLD_VIRTUAL_PATH=%PATH%
 
-set "PATH=%VIRTUAL_ENV%\Scripts;%PATH%"
-set "VIRTUAL_ENV_PROMPT=(venv) "
+set PATH=%VIRTUAL_ENV%\Scripts;%PATH%
 
 :END
 if defined _OLD_CODEPAGE (

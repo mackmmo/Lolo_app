@@ -16,11 +16,10 @@ import dj_database_url
 import sys
 
 if sys.platform == "win32":
-    os.environ["PATH"] = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin;" + os.environ.get("PATH", "")
-    os.environ["GDAL_LIBRARY_PATH"] = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
-    os.environ["GEOS_LIBRARY_PATH"] = r"C:\Users\basel\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
+    os.environ["PATH"] = r"C:\Users\moore\AppData\Local\Programs\OSGeo4W\bin;" + os.environ.get("PATH", "")
+    os.environ["GDAL_LIBRARY_PATH"] = r"C:\Users\moore\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll"
+    os.environ["GEOS_LIBRARY_PATH"] = r"C:\Users\moore\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll"
 else:
-    # make sure we DON'T carry Windows values in production
     os.environ.pop("GDAL_LIBRARY_PATH", None)
     os.environ.pop("GEOS_LIBRARY_PATH", None)
 
@@ -69,7 +68,7 @@ INSTALLED_APPS = [
 
     # Your apps (use real folder names)
     "guide",
-    "api"
+    
 ]
 
 MIDDLEWARE = [
