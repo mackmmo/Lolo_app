@@ -15,31 +15,14 @@ import os
 import sys
 
 
-ENV = os.environ.get("DJANGO_ENV", "local")  # default to local
-
-if ENV == "local":
-    # Use local Postgres database
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": "lolo_local_db",
-            "USER": "postgres",
-            "PASSWORD": "your_local_password",
-            "HOST": "localhost",
-            "PORT": "5432",
-        }
-    }
-else:
-    # Production (Render)
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=os.environ.get("DATABASE_URL"),
-            conn_max_age=600,
-            ssl_require=True
-        )
-    }
-
-
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        engine="django.contrib.gis.db.backends.postgis",
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
