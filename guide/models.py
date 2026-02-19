@@ -2,9 +2,9 @@
 from django.db import models  # regular Django models
 
 class Sector(models.Model):
-    sector_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    sector_id = models.IntegerField()
+    name = models.CharField(max_length=100)
+    geom = models.GeometryField()
 
-    def __str__(self):
-        return self.name
+    class Meta:
+        db_table = 'sector'  # <- force Django to use the existing table
