@@ -1,5 +1,6 @@
 
 from django.db import models  # regular Django models
+from django.contrib.gis.db import models # spatial models
 
 class Sector(models.Model):
     sector_id = models.IntegerField()
