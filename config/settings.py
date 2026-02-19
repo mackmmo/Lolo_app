@@ -35,10 +35,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i_2jpsiaw@j1c%3jmeh*u1ylucvcdbg884=)p04=bck^1%az0m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ALLOWED_HOSTS = [
-    "lolo-app-1.onrender.com",
-]
+DEBUG = True
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
