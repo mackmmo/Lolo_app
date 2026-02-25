@@ -1,17 +1,22 @@
 # guide/views.py
 from rest_framework import generics
-from .models import Sector
-from .serializers import SectorSerializer
+from .models import Sector, Area, SubArea, Routes
+from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RoutesSerializer
 from django.http import JsonResponse
-from django.views import View
 
 class SectorListView(generics.ListAPIView):
     queryset = Sector.objects.all().order_by('sector_id')
     serializer_class = SectorSerializer
 
-def db_debug(request):
-    try:
-        sector_count = Sector.objects.count()
-        return JsonResponse({"status": "ok", "sector_count": sector_count})
-    except Exception as e:
-        return JsonResponse({"status": "error", "error": str(e)})
+class AreaListView(generics.ListAPIView):
+    queryset = Area.objects.all().order_by('area_id')
+    serializer_class = AreaSerializer
+
+class SubAreaListView(generics.ListAPIView):
+    queryset = SubArea.objects.all().order_by('subarea_id')
+    serializer_class = SubAreaSerializer
+
+class RoutesListView(generics.ListAPIView):
+    queryset = Routes.objects.all().order_by('route_id')
+    serializer_class = RoutesSerializer
+    
