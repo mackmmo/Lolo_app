@@ -22,6 +22,5 @@ from api.views import ExampleAPIView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('sectors/', SectorListView.as_view(), name='sector-list'),
-    path('db-debug/', db_debug, name='db-debug'),
     path('api/', include('api.urls')),  # include API URLs
 ]
