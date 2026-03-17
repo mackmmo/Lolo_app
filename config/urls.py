@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from guide.views import SectorListView, db_debug  # import the view
+from guide.views import SectorListView # import the view
 from api.views import ExampleAPIView
 
 urlpatterns = [
