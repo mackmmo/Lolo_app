@@ -31,7 +31,6 @@ class Area(models.Model):
 class SubArea(models.Model):
     subarea_id = models.IntegerField(primary_key=True)
     area = models.ForeignKey(Area, on_delete=models.CASCADE, db_column='area_id')  # Assuming a subarea belongs to an area
-    boundary = geomodels.MultiPolygonField(srid=3857)  # Assuming the boundary is a polygon
     centroid = geomodels.PointField(srid=3857)  # Assuming the centroid is a point
     name = models.CharField(max_length=100)
     description = models.TextField()
