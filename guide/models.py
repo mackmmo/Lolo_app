@@ -19,8 +19,26 @@ class Area(models.Model):
     centroid = geomodels.PointField(srid=3857)  # Assuming the centroid is a point
     name = models.CharField(max_length=100)
     description = models.TextField()
+    directions = models.TextField() 
+    approach_time = models.IntegerField()
+    drive_time = models.IntegerField()
+    aspect = models.CharField(max_length=100)  # Assuming aspect is a string field
     #image = models.URLField()  # Assuming you want to store an image URL for the area
 
     class Meta:
         db_table = 'area'  # <- force Django to use the existing table
+
+class SubArea(models.Model):
+    subarea_id = models.IntegerField(primary_key=True)
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, db_column='area_id')  # Assuming a subarea belongs to an area
+    boundary = geomodels.MultiPolygonField(srid=3857)  # Assuming the boundary is a polygon
+    centroid = geomodels.PointField(srid=3857)  # Assuming the centroid is a point
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    aspect = models.CharField(max_length=100)  # Assuming aspect is a string field
+    #image = models.URLField()  # Assuming you want to store an image URL for the subarea
+
+    class Meta:
+        db_table = 'subarea'  # <- force Django to use the existing table
+
 
