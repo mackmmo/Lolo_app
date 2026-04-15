@@ -55,4 +55,7 @@ class Route(models.Model):
     first_ascencionist = models.CharField(max_length=100)
     fa_year = models.IntegerField() 
 
+    class Meta:
+        db_table = 'route'  # <- force Django to use the existing table
+
 
