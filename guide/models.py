@@ -40,4 +40,19 @@ class SubArea(models.Model):
     class Meta:
         db_table = 'subarea'  # <- force Django to use the existing table
 
+class Route(models.Model):
+    route_id = models.IntegerField(primary_key=True)
+    crag_order = models.IntegerField()
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=50)
+    description = models.TextField()
+    grade = models.CharField(max_length=50)
+    subarea = models.ForeignKey(SubArea, on_delete=models.CASCADE, db_column='subarea_id')
+    danger_rating = models.CharField(max_length=50)
+    star_rating = models.IntegerFieldField()
+    centroid = geomodels.PointField(srid=3857)
+    height = models.IntegerField()
+    first_ascencionist = models.CharField(max_length=100)
+    fa_year = models.IntegerField() 
+
 

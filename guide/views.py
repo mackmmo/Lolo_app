@@ -1,7 +1,7 @@
 # guide/views.py
 from rest_framework import generics
-from .models import Sector, Area, SubArea
-from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer
+from .models import Sector, Area, SubArea, Route
+from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer
 from django.http import JsonResponse
 
 class SectorListView(generics.ListAPIView):
@@ -16,3 +16,6 @@ class SubAreaListView(generics.ListAPIView):
     queryset = SubArea.objects.all().order_by('subarea_id')
     serializer_class = SubAreaSerializer
     
+class RouteListView(generics.ListAPIView):
+    queryset = Route.objects.all().order_by('route_id')
+    serializer_class = RouteSerializer
