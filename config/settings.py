@@ -14,6 +14,9 @@ import dj_database_url
 import os
 import sys
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
 
 DATABASES = {
     "default": dj_database_url.config(
@@ -48,14 +51,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Third-party
+    "django_filters",
     "rest_framework",
-
-    # GeoDjango (needed for PostGIS)
     "django.contrib.gis",
-
-    # Your apps (use real folder names)
     "guide",
     
 ]

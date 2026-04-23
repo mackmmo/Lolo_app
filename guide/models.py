@@ -54,8 +54,8 @@ class Route(models.Model):
     height = models.IntegerField()
     first_ascencionist = models.CharField(max_length=100)
     fa_year = models.IntegerField() 
-
+    grade_index = models.IntegerField()
     class Meta:
-        db_table = 'route'  # <- force Django to use the existing table
+        db_table = 'route' 
 
 
