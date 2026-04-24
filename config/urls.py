@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from guide.views import SectorListView, AreaListView, SubAreaListView, RouteListView  # import the views
+from guide.views import RouteDetailView, SectorListView, AreaListView, SubAreaListView, RouteListView  # import the views
 from api.views import ExampleAPIView
 
 urlpatterns = [
@@ -25,5 +25,6 @@ urlpatterns = [
     path('areas/', AreaListView.as_view(), name='area-list'),
     path('api/', include('api.urls')),  # include API URLs
     path('subareas/', SubAreaListView.as_view(), name='subarea-list'),
-    path('routes/', RouteListView.as_view(), name='route-list')
+    path('routes/', RouteListView.as_view(), name='route-list'),
+    path('routes/<int:pk>/', RouteDetailView.as_view(), name='route-detail'),
 ]
