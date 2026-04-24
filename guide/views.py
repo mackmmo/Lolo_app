@@ -30,7 +30,7 @@ class RouteFilter(django_filters.FilterSet):
 
     class Meta:
         model = Route
-        fields = ["area_id", "subarea_id"]
+        fields = ["area", "subarea"]
 
 class RouteListView(generics.ListAPIView):
     queryset = Route.objects.all()
