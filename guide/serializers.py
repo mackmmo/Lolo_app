@@ -7,9 +7,28 @@ class SectorSerializer(serializers.ModelSerializer):
         fields = ['sector_id', 'name', 'description','boundary', 'centroid']
 
 class RouteSerializer(serializers.ModelSerializer):
+    area_name = serializers.CharField(source="area.name", read_only=True)
+    subarea_name = serializers.CharField(source="subarea.name", read_only=True)
+    
     class Meta:
         model = Route
-        fields = ['route_id', 'crag_order', 'centroid', 'name', 'type', 'description', 'grade', 'subarea', 'danger_rating', 'star_rating', 'centroid', 'height', 'first_ascencionist', 'fa_year']
+        fields = ['route_id',
+                  'area_name',
+                  'subarea_name',
+                  'area'
+                  'crag_order', 
+                  'centroid', 
+                  'name', 
+                  'type', 
+                  'description', 
+                  'grade', 
+                  'subarea',    
+                  'danger_rating', 
+                  'star_rating', 
+                  'centroid', 
+                  'height', 
+                  'first_ascencionist', 
+                  'fa_year']
 
 class AreaSerializer(serializers.ModelSerializer):
     class Meta:
