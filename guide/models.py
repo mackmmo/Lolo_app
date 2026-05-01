@@ -47,9 +47,21 @@ class Route(models.Model):
     type = models.CharField(max_length=50)
     description = models.TextField()
     grade = models.CharField(max_length=50)
-    subarea = models.ForeignKey(SubArea, on_delete=models.CASCADE, db_column='subarea_id')
+    
+    subarea = models.ForeignKey(SubArea, 
+                                on_delete=models.SET_NULL,
+                                related_name='routes',
+                                null=True, 
+                                blank=True,
+                                db_column='subarea_id')
+    
+    area = models.ForeignKey(Area, 
+                             on_delete=models.CASCADE, 
+                             db_column='area_id') 
+    
     danger_rating = models.CharField(max_length=50)
     star_rating = models.IntegerField()
+
     centroid = geomodels.PointField(srid=3857)
     height = models.IntegerField()
     first_ascencionist = models.CharField(max_length=100)
