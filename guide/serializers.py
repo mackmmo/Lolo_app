@@ -15,7 +15,7 @@ class RouteSerializer(serializers.ModelSerializer):
         fields = ['route_id',
                   'area_name',
                   'subarea_name',
-                  'area'
+                  'area',
                   'crag_order', 
                   'centroid', 
                   'name', 
