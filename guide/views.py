@@ -2,7 +2,8 @@ from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
-
+from django.http import HttpResponse
+from django.db import connection
 from .models import Sector, Area, SubArea, Route
 from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer
     
@@ -40,17 +41,171 @@ class RouteListView(generics.ListAPIView):
     search_fields = ["name", "grade", "type"]
     ordering_fields = ["name", "grade", "type"]
 
-'''
-def aspect_calculator(aspect):
-    aspect_mapping = {
-        'north': ['Morning': False, 'Afternoon': False, 'Evening': False],
-        'northeast': ['Morning': True, 'Afternoon': False, 'Evening': False],
-        'east': ['Morning': True, 'Afternoon': False, 'Evening': False],
-        'southeast': ['Morning': True, 'Afternoon': True, 'Evening': False],
-        'south': ['Morning': True, 'Afternoon': True, 'Evening': True],
-        'southwest': ['Morning': False, 'Afternoon': True, 'Evening': True],
-        'west': ['Morning': False, 'Afternoon': False, 'Evening': True],
-        'northwest': ['Morning': False, 'Afternoon': False, 'Evening': True],
-    }
-    return aspect_mapping.get(aspect.upper(), None)
-'''
+# Vector tile endpoint for areas
+def area_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                area_id,
+                name,
+                ST_AsMVTGeom(
+                  boundary,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM area
+              WHERE boundary && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'areas', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
+
+# Vector tile endpoint for roads
+def road_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                road_id,
+                roadname,
+                ST_AsMVTGeom(
+                  wkb_geometry,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM roads
+              WHERE geometry && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'roads', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
+
+# Vector tile endpoint for trails
+def trail_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                trail_id,
+                approach,
+                ST_AsMVTGeom(
+                  wkb_geometry,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM trails
+              WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'trails', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
+
+# Vector tile endpoint for pois
+def poi_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                poi_id,
+                name,
+                ST_AsMVTGeom(
+                  wkb_geometry,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM pois
+              WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'poi', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
+
+# Vector tile endpoint for trailheads
+def trailhead_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                trailhead_id,
+                name,
+                ST_AsMVTGeom(
+                  wkb_geometry,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM trailheads
+              WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'trailheads', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
+
+# Vector tile endpoint for gates
+def gate_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                gate_id,
+                name,
+                description,
+                ST_AsMVTGeom(
+                  wkb_geometry,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM gates
+              WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'gates', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
