@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from guide.views import RouteDetailView, SectorListView, AreaListView, SubAreaListView, RouteListView  # import the views
+from . import views
+from guide.views import RouteDetailView, SectorListView, AreaListView, SubAreaListView, RouteListView, area_tiles  # import the views
 from api.views import ExampleAPIView
 
 urlpatterns = [
@@ -27,4 +28,12 @@ urlpatterns = [
     path('subareas/', SubAreaListView.as_view(), name='subarea-list'),
     path('routes/', RouteListView.as_view(), name='route-list'),
     path('routes/<int:pk>/', RouteDetailView.as_view(), name='route-detail'),
+    
+    path("tiles/areas/<int:z>/<int:x>/<int:y>.mvt", views.area_tiles, name="area-tiles"),
+    path("tiles/roads/<int:z>/<int:x>/<int:y>.mvt", views.road_tiles, name="road-tiles"),
+    path("tiles/trails/<int:z>/<int:x>/<int:y>.mvt", views.trail_tiles, name="trail-tiles"),
+    path("tiles/pois/<int:z>/<int:x>/<int:y>.mvt", views.poi_tiles, name="poi-tiles"),
+    path("tiles/trailheads/<int:z>/<int:x>/<int:y>.mvt", views.trailhead_tiles, name="trailhead-tiles"),
+    path("tiles/gates/<int:z>/<int:x>/<int:y>.mvt", views.gate_tiles, name="gate-tiles"),
+    path("tiles/parking/<int:z>/<int:x>/<int:y>.mvt", views.parking_tiles, name="parking-tiles"),
 ]
