@@ -75,6 +75,34 @@ def area_tiles(request, z, x, y):
         bytes(row[0]) if row and row[0] else b"",
         content_type="application/vnd.mapbox-vector-tile"
     )
+# area label endpoint
+def area_label_tiles(request, z, x, y):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            WITH mvtgeom AS (
+              SELECT
+                area_id,
+                name,
+                ST_AsMVTGeom(
+                  centroid,
+                  ST_TileEnvelope(%s, %s, %s),
+                  4096,
+                  64,
+                  true
+                ) AS geom
+              FROM area
+              WHERE centroid && ST_TileEnvelope(%s, %s, %s)
+            )
+            SELECT ST_AsMVT(mvtgeom, 'area_labels', 4096, 'geom')
+            FROM mvtgeom
+        """, [z, x, y, z, x, y])
+        row = cursor.fetchone()
+
+    return HttpResponse(
+        bytes(row[0]) if row and row[0] else b"",
+        content_type="application/vnd.mapbox-vector-tile"
+    )
+
 
 # Vector tile endpoint for roads
 def road_tiles(request, z, x, y):
