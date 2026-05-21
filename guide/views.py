@@ -53,7 +53,8 @@ def area_tiles(request, z, x, y):
                 drive_time,
                 approach_time,
                 aspect,
-                ST_AsText(centroid) AS centroid_wkt,
+                ST_X(ST_Transform(centroid, 4326)) AS lon,
+                ST_Y(ST_Transform(centroid, 4326)) AS lat,
                 ST_AsMVTGeom(
                   boundary,
                   ST_TileEnvelope(%s, %s, %s),
