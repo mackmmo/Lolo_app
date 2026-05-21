@@ -85,7 +85,7 @@ def road_tiles(request, z, x, y):
                   true
                 ) AS geom
               FROM roads
-              WHERE geometry && ST_TileEnvelope(%s, %s, %s)
+              WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
             )
             SELECT ST_AsMVT(mvtgeom, 'roads', 4096, 'geom')
             FROM mvtgeom

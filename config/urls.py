@@ -16,9 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from . import views
-from guide.views import RouteDetailView, SectorListView, AreaListView, SubAreaListView, RouteListView, area_tiles  # import the views
-from api.views import ExampleAPIView
+from guide.views import (
+    RouteDetailView,
+    SectorListView,
+    AreaListView,
+    SubAreaListView,
+    RouteListView,
+    area_tiles,
+    road_tiles,
+    trail_tiles,
+    poi_tiles,
+    trailhead_tiles,
+    gate_tiles,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

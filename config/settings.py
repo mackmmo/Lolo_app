@@ -18,8 +18,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
-GDAL_LIBRARY_PATH = r"C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\Library\bin\gdal_e.dll"
-GEOS_LIBRARY_PATH = r"C:\Users\moore\anaconda3\pkgs\geos-3.14.1-hdade9fe_0\Library\bin\geos_c.dll"
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"),
