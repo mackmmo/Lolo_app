@@ -1,21 +1,6 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
+
 from guide.views import (
     RouteDetailView,
     SectorListView,
@@ -32,6 +17,7 @@ from guide.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('sectors/', SectorListView.as_view(), name='sector-list'),
     path('areas/', AreaListView.as_view(), name='area-list'),
     path('api/', include('api.urls')),  # include API URLs
@@ -39,11 +25,10 @@ urlpatterns = [
     path('routes/', RouteListView.as_view(), name='route-list'),
     path('routes/<int:pk>/', RouteDetailView.as_view(), name='route-detail'),
     
-    path("tiles/areas/<int:z>/<int:x>/<int:y>.mvt", views.area_tiles, name="area-tiles"),
-    path("tiles/roads/<int:z>/<int:x>/<int:y>.mvt", views.road_tiles, name="road-tiles"),
-    path("tiles/trails/<int:z>/<int:x>/<int:y>.mvt", views.trail_tiles, name="trail-tiles"),
-    path("tiles/pois/<int:z>/<int:x>/<int:y>.mvt", views.poi_tiles, name="poi-tiles"),
-    path("tiles/trailheads/<int:z>/<int:x>/<int:y>.mvt", views.trailhead_tiles, name="trailhead-tiles"),
-    path("tiles/gates/<int:z>/<int:x>/<int:y>.mvt", views.gate_tiles, name="gate-tiles"),
-    path("tiles/parking/<int:z>/<int:x>/<int:y>.mvt", views.parking_tiles, name="parking-tiles"),
+    path("tiles/areas/<int:z>/<int:x>/<int:y>.mvt", area_tiles, name="area-tiles"),
+    path("tiles/roads/<int:z>/<int:x>/<int:y>.mvt", road_tiles, name="road-tiles"),
+    path("tiles/trails/<int:z>/<int:x>/<int:y>.mvt", trail_tiles, name="trail-tiles"),
+    path("tiles/pois/<int:z>/<int:x>/<int:y>.mvt", poi_tiles, name="poi-tiles"),
+    path("tiles/trailheads/<int:z>/<int:x>/<int:y>.mvt", trailhead_tiles, name="trailhead-tiles"),
+    path("tiles/gates/<int:z>/<int:x>/<int:y>.mvt", gate_tiles, name="gate-tiles"),
 ]
