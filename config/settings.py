@@ -146,4 +146,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = [
     "lolo-app-1.onrender.com",
+    "lolo-app-2.onrender.com",
 ]
