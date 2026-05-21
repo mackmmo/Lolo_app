@@ -49,6 +49,11 @@ def area_tiles(request, z, x, y):
               SELECT
                 area_id,
                 name,
+                description,
+                drive_time,
+                approach_time,
+                aspect,
+                ST_AsText(centroid) AS centroid_wkt,
                 ST_AsMVTGeom(
                   boundary,
                   ST_TileEnvelope(%s, %s, %s),
