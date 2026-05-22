@@ -26,7 +26,7 @@ urlpatterns = [
     path('routes/', RouteListView.as_view(), name='route-list'),
     path('routes/<int:pk>/', RouteDetailView.as_view(), name='route-detail'),
     
-    path("tiles/area-labels/<int:z>/<int:x>/<int:y>.mvt", area_labels_tiles, name="area-labels-tiles"),
+    path("tiles/area-labels/<int:z>/<int:x>/<int:y>.mvt", area_label_tiles, name="area-label-tiles"),
     path("tiles/areas/<int:z>/<int:x>/<int:y>.mvt", area_tiles, name="area-tiles"),
     path("tiles/roads/<int:z>/<int:x>/<int:y>.mvt", road_tiles, name="road-tiles"),
     path("tiles/trails/<int:z>/<int:x>/<int:y>.mvt", trail_tiles, name="trail-tiles"),
