@@ -112,7 +112,7 @@ def road_tiles(request, z, x, y):
                 road_id,
                 roadname,
                 ST_AsMVTGeom(
-                  wkb_geometry,
+                  ST_Transform(ST_Force2D(wkb_geometry), 3857),
                   ST_TileEnvelope(%s, %s, %s),
                   4096,
                   64,
