@@ -103,7 +103,6 @@ def area_label_tiles(request, z, x, y):
         content_type="application/vnd.mapbox-vector-tile"
     )
 
-
 # Vector tile endpoint for roads
 def road_tiles(request, z, x, y):
     with connection.cursor() as cursor:
@@ -120,7 +119,7 @@ def road_tiles(request, z, x, y):
                   true
                 ) AS geom
               FROM roads
-              WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
+              WHERE ST_Transform(wkb_geometry, 3857) && ST_TileEnvelope(%s, %s, %s)
             )
             SELECT ST_AsMVT(mvtgeom, 'roads', 4096, 'geom')
             FROM mvtgeom
