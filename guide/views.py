@@ -174,7 +174,7 @@ def poi_tiles(request, z, x, y):
                   64,
                   true
                 ) AS geom
-              FROM pois
+              FROM poi
               WHERE wkb_geometry && ST_TileEnvelope(%s, %s, %s)
             )
             SELECT ST_AsMVT(mvtgeom, 'poi', 4096, 'geom')
