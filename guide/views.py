@@ -26,22 +26,22 @@ class RouteDetailView(generics.RetrieveAPIView):
 class RouteFilter(django_filters.FilterSet):
     min_grade = django_filters.NumberFilter(field_name="grade_index", lookup_expr="gte")
     max_grade = django_filters.NumberFilter(field_name="grade_index", lookup_expr="lte")
-    area = django_filters.CharFilter(field_name="area__name", lookup_expr="icontains")
-    subarea = django_filters.CharFilter(field_name="subarea__name", lookup_expr="icontains")
+    sector = django_filters.NumberFilter(field_name="area__sector__sector_id")
+    area = django_filters.NumberFilter(field_name="area__area_id")
+    subarea = django_filters.NumberFilter(field_name="subarea__subarea_id")
     type = django_filters.CharFilter(field_name="type", lookup_expr="iexact")
-    star_rating = django_filters.NumberFilter(field_name="star_rating", lookup_expr="gte")
 
     class Meta:
         model = Route
-        fields = ["area", "subarea"]
+        fields = ["sector", "area", "subarea", "type"]
 
 class RouteListView(generics.ListAPIView):
-    queryset = Route.objects.all()
+    queryset = Route.objects.all().order_by("route_id")
     serializer_class = RouteSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RouteFilter
-    search_fields = ["name", "grade", "type", "star_rating", "area__name", "subarea__name"]
-    ordering_fields = ["name", "grade", "type", "star_rating"]
+    search_fields = ["name", "grade", "type", "area__name", "subarea__name"]
+    ordering_fields = ["name", "grade_index", "star_rating", "height"]
 
 # Vector tile endpoint for areas
 def area_tiles(request, z, x, y):
