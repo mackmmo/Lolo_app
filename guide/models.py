@@ -45,6 +45,7 @@ class Route(models.Model):
     crag_order = models.IntegerField()
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=50)
+    pro = models.CharField(max_length=50)
     description = models.TextField()
     grade = models.CharField(max_length=50)
     
