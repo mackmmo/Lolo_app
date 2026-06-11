@@ -28,6 +28,8 @@ class RouteFilter(django_filters.FilterSet):
     max_grade = django_filters.NumberFilter(field_name="grade_index", lookup_expr="lte")
     area = django_filters.CharFilter(field_name="area__name", lookup_expr="icontains")
     subarea = django_filters.CharFilter(field_name="subarea__name", lookup_expr="icontains")
+    type = django_filters.CharFilter(field_name="type", lookup_expr="iexact")
+    star_rating = django_filters.NumberFilter(field_name="star_rating", lookup_expr="gte")
 
     class Meta:
         model = Route
@@ -38,8 +40,8 @@ class RouteListView(generics.ListAPIView):
     serializer_class = RouteSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RouteFilter
-    search_fields = ["name", "grade", "type"]
-    ordering_fields = ["name", "grade", "type"]
+    search_fields = ["name", "grade", "type", "star_rating", "area__name", "subarea__name"]
+    ordering_fields = ["name", "grade", "type", "star_rating"]
 
 # Vector tile endpoint for areas
 def area_tiles(request, z, x, y):
