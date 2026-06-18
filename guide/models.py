@@ -70,5 +70,6 @@ class Route(models.Model):
     grade_index = models.IntegerField()
     class Meta:
         db_table = 'route' 
+        ordering = ['subarea__area_id', 'subarea_id', 'crag_order', 'route_id']
 
 

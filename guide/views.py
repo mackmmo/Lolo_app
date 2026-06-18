@@ -41,7 +41,7 @@ class RouteListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RouteFilter
     search_fields = ["name", "grade", "type", "area__name", "subarea__name"]
-    ordering_fields = ["name", "grade_index", "star_rating", "height"]
+    ordering_fields = [["name", "grade", "grade_index", "type", "star_rating", "height", "crag_order"]]
 
 # Vector tile endpoint for areas
 def area_tiles(request, z, x, y):
