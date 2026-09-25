@@ -14,8 +14,13 @@ import dj_database_url
 import os
 import sys
 
+import rest_framework
+import social_core
+
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
 }
 
 DATABASES = {
@@ -34,17 +39,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-i_2jpsiaw@j1c%3jmeh*u1ylucvcdbg884=)p04=bck^1%az0m'
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+DATABASE_URL = os.environ.get("DATABASE_URL")
+ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOSTS")]
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['*']
 
 # Application definition
 
 INSTALLED_APPS = [
     # Django
+    'social_django',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -58,6 +63,16 @@ INSTALLED_APPS = [
     "corsheaders",
     
 ]
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.apple.AppleIdAuth',
+)   
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get(
+    "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY",
+    "django.contrib.auth.backends.ModelBackend",
+)
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -144,7 +159,3 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = [
-    "lolo-app-1.onrender.com",
-    "lolo-app-2.onrender.com",
-]

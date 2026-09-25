@@ -6,7 +6,11 @@ from django.http import HttpResponse
 from django.db import connection
 from .models import Sector, Area, SubArea, Route
 from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer
-    
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 class SectorListView(generics.ListAPIView):
     queryset = Sector.objects.all().order_by('sector_id')
     serializer_class = SectorSerializer
@@ -245,3 +249,26 @@ def gate_tiles(request, z, x, y):
         bytes(row[0]) if row and row[0] else b"",
         content_type="application/vnd.mapbox-vector-tile"
     )
+
+@api_view(['POST'])
+def verify_google_token(request):
+    token = request.data.get('token')
+    if not token:
+        return Response({'error': 'Token is required'}, status=400)
+
+    try:
+        # Specify the CLIENT_ID of the app that accesses the backend:
+        CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"
+        idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+
+        # ID token is valid. Get the user's Google Account ID from the decoded token.
+        userid = idinfo['sub']
+        email = idinfo.get('email')
+        name = idinfo.get('name')
+
+        return Response({'userid': userid, 'email': email, 'name': name})
+
+    except ValueError:
+        # Invalid token
+        return Response({'error': 'Invalid token'}, status=400)
+

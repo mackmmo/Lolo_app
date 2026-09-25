@@ -33,4 +33,7 @@ urlpatterns = [
     path("tiles/pois/<int:z>/<int:x>/<int:y>.mvt", poi_tiles, name="poi-tiles"),
     path("tiles/trailheads/<int:z>/<int:x>/<int:y>.mvt", trailhead_tiles, name="trailhead-tiles"),
     path("tiles/gates/<int:z>/<int:x>/<int:y>.mvt", gate_tiles, name="gate-tiles"),
-]
+
+    path('auth/', include('social_django.urls', namespace='social'))
+    ]
+
