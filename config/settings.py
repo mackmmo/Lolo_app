@@ -13,9 +13,7 @@ from pathlib import Path
 import dj_database_url
 import os
 import sys
-
 import rest_framework
-import social_core
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
@@ -64,9 +62,7 @@ INSTALLED_APPS = [
     
 ]
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
-    'social_core.backends.apple.AppleIdAuth',
+    'django.contrib.auth.backends.ModelBackend'
 )   
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get(
