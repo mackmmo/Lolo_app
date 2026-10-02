@@ -23,6 +23,8 @@ from guide.views import (
     change_password,
     RouteLogListCreateView,
     RouteLogDetailView,
+    password_reset_request,
+    password_reset_confirm,
 )
 
 urlpatterns = [
@@ -32,6 +34,8 @@ urlpatterns = [
     path('api/profile/password/', change_password, name='change-password'),
     path("api/password-reset/", auth_views.PasswordResetView.as_view(), name="password_reset"),
     path("api/password-reset-confirm/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path("api/password-reset/", password_reset_request, name="password-reset"),
+    path("api/password-reset-confirm/", password_reset_confirm, name="password-reset-confirm"),
 
     path("api/logbook/", RouteLogListCreateView.as_view(), name="route-log-list"),
     path("api/logbook/<int:log_id>/", RouteLogDetailView.as_view(), name="route-log-detail"),

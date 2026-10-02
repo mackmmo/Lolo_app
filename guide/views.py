@@ -1,3 +1,12 @@
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from rest_framework import status
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
@@ -6,6 +15,8 @@ import django_filters
 from django.http import HttpResponse
 from django.db import connection
 from .models import Sector, Area, SubArea, Route, RouteLog
+from rest_framework.decorators import api_view, permission_classes
+
 
 from .serializers import (
     SectorSerializer,
@@ -19,9 +30,98 @@ from .serializers import (
 
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    email = request.data.get("email", "").strip()
+
+    # Always return the same response so we don't reveal
+    # whether an email address has an account.
+    response_message = {
+        "detail": "If an account exists for that email, a password reset link has been sent."
+    }
+
+    if not email:
+        return Response(response_message)
+
+    user = User.objects.filter(
+        email__iexact=email,
+        is_active=True
+    ).first()
+
+    if user:
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+
+        reset_url = (
+            f"{settings.FRONTEND_URL}"
+            f"?reset_uid={uid}&reset_token={token}"
+        )
+
+        subject = "Reset your Lolo Guide password"
+
+        message = (
+            f"Hi {user.username},\n\n"
+            "We received a request to reset your Lolo Guide password.\n\n"
+            f"Reset your password here:\n{reset_url}\n\n"
+            "If you didn't request this, you can ignore this email.\n"
+        )
+
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+    return Response(response_message)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    uid = request.data.get("uid")
+    token = request.data.get("token")
+    new_password = request.data.get("new_password")
+
+    if not uid or not token or not new_password:
+        return Response(
+            {"detail": "uid, token, and new_password are required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        user_id = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=user_id)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response(
+            {"detail": "Invalid or expired password reset link."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not default_token_generator.check_token(user, token):
+        return Response(
+            {"detail": "Invalid or expired password reset link."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        validate_password(new_password, user=user)
+    except ValidationError as exc:
+        return Response(
+            {"new_password": list(exc.messages)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+
+    return Response({
+        "detail": "Password reset successfully."
+    })
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
