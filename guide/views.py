@@ -490,3 +490,38 @@ class RouteCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         # A user can only edit/delete their OWN comments.
         return RouteComment.objects.filter(user=self.request.user)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def route_community_stats(request, route_id):
+    # Make sure the route actually exists.
+    try:
+        route = Route.objects.get(pk=route_id)
+    except Route.DoesNotExist:
+        return Response(
+            {"detail": "Route not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    sent_logs = RouteLog.objects.filter(
+        route=route,
+        status="sent",
+    )
+
+    send_counts = {
+        row["send_style"]: row["count"]
+        for row in (
+            sent_logs
+            .exclude(send_style__isnull=True)
+            .values("send_style")
+            .annotate(count=Count("log_id"))
+        )
+    }
+
+    return Response({
+        "route": route.route_id,
+        "total_sends": sent_logs.count(),
+        "onsight": send_counts.get("onsight", 0),
+        "flash": send_counts.get("flash", 0),
+        "redpoint": send_counts.get("redpoint", 0),
+    })
