@@ -23,6 +23,8 @@ from guide.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/profile/', profile_view, name='profile'),
+    path('api/profile/password/', change_password, name='change-password'),
     
     path('sectors/', SectorListView.as_view(), name='sector-list'),
     path('areas/', AreaListView.as_view(), name='area-list'),

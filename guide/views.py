@@ -1,12 +1,12 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
 from django.http import HttpResponse
 from django.db import connection
 from .models import Sector, Area, SubArea, Route
-from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer, RegisterSerializer
+from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer, RegisterSerializer, ChangePasswordSerializer
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from rest_framework.decorators import api_view
@@ -16,6 +16,21 @@ from rest_framework.response import Response
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+
+@api_view(["GET"])
+def profile_view(request):
+    return Response({
+        "username": request.user.username,
+        "email": request.user.email,
+    })
+
+@api_view(["POST"])
+def change_password(request):
+    serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+    request.user.set_password(serializer.validated_data["new_password"])
+    request.user.save(update_fields=["password"])
+    return Response({"detail": "Password updated successfully."})
 
 class SectorListView(generics.ListAPIView):
     queryset = Sector.objects.all().order_by('sector_id')
