@@ -135,3 +135,59 @@ class RouteLog(models.Model):
                 name="unique_user_route_log"
             )
         ]
+
+class RouteTodo(models.Model):
+    todo_id = models.BigAutoField(primary_key=True)
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column="user_id",
+        related_name="route_todos",
+    )
+
+    route = models.ForeignKey(
+        "Route",
+        on_delete=models.CASCADE,
+        db_column="route_id",
+        related_name="user_todos",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "route_todo"
+        managed = False
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "route"],
+                name="unique_user_route_todo",
+            )
+        ]
+
+
+class RouteComment(models.Model):
+    comment_id = models.BigAutoField(primary_key=True)
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column="user_id",
+        related_name="route_comments",
+    )
+
+    route = models.ForeignKey(
+        "Route",
+        on_delete=models.CASCADE,
+        db_column="route_id",
+        related_name="comments",
+    )
+
+    comment = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "route_comment"
+        managed = False
