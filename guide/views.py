@@ -5,8 +5,18 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
 from django.http import HttpResponse
 from django.db import connection
-from .models import Sector, Area, SubArea, Route
-from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer, RegisterSerializer, ChangePasswordSerializer
+from .models import Sector, Area, SubArea, Route, RouteLog
+
+from .serializers import (
+    SectorSerializer,
+    AreaSerializer,
+    SubAreaSerializer,
+    RouteSerializer,
+    RouteLogSerializer,
+    RegisterSerializer,
+    ChangePasswordSerializer,
+)
+
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from rest_framework.decorators import api_view
@@ -293,3 +303,28 @@ def verify_google_token(request):
         # Invalid token
         return Response({'error': 'Invalid token'}, status=400)
 
+class RouteLogListCreateView(generics.ListCreateAPIView):
+    serializer_class = RouteLogSerializer
+
+    def get_queryset(self):
+        return (
+            RouteLog.objects
+            .filter(user=self.request.user)
+            .select_related("route")
+            .order_by("-updated_at")
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = RouteLogSerializer
+    lookup_field = "log_id"
+
+    def get_queryset(self):
+        return (
+            RouteLog.objects
+            .filter(user=self.request.user)
+            .select_related("route")
+        )

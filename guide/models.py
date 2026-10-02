@@ -73,3 +73,65 @@ class Route(models.Model):
         ordering = ['subarea__area_id', 'subarea_id', 'crag_order', 'route_id']
 
 
+from django.contrib.auth.models import User
+
+class RouteLog(models.Model):
+    STATUS_CHOICES = [
+        ("project", "Project"),
+        ("sent", "Sent"),
+    ]
+
+    SEND_STYLE_CHOICES = [
+        ("onsight", "Onsight"),
+        ("flash", "Flash"),
+        ("redpoint", "Redpoint"),
+        ("pinkpoint", "Pinkpoint"),
+    ]
+
+    log_id = models.BigAutoField(primary_key=True)
+
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        db_column="route_id",
+        related_name="user_logs"
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column="user_id",
+        related_name="route_logs"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="project"
+    )
+
+    send_style = models.CharField(
+        max_length=20,
+        choices=SEND_STYLE_CHOICES,
+        null=True,
+        blank=True
+    )
+
+    date_sent = models.DateField(null=True, blank=True)
+
+    beta = models.TextField(null=True, blank=True)
+
+    attempts = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "route_log"
+        managed = False
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "route"],
+                name="unique_user_route_log"
+            )
+        ]

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from .models import Sector, Area, SubArea, Route
+from .models import Sector, Area, SubArea, Route, RouteLog
 
 class SectorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,7 +44,6 @@ class SubAreaSerializer(serializers.ModelSerializer):
         model = SubArea
         fields = ['subarea_id', 'area', 'centroid', 'name', 'description', 'aspect']
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True)
@@ -84,3 +83,35 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"new_password_confirm": "Passwords do not match."})
         validate_password(attrs["new_password"], self.context["request"].user)
         return attrs
+
+class RouteLogSerializer(serializers.ModelSerializer):
+    route_name = serializers.CharField(
+        source="route.name",
+        read_only=True
+    )
+    grade = serializers.CharField(
+        source="route.grade",
+        read_only=True
+    )
+
+    class Meta:
+        model = RouteLog
+        fields = [
+            "log_id",
+            "route",
+            "route_name",
+            "grade",
+            "status",
+            "send_style",
+            "attempts",
+            "date_sent",
+            "beta",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "log_id",
+            "created_at",
+            "updated_at",
+        ]

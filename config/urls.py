@@ -20,6 +20,8 @@ from guide.views import (
     gate_tiles,
     profile_view,
     change_password,
+    RouteLogListCreateView,
+    RouteLogDetailView,
 )
 
 urlpatterns = [
@@ -27,6 +29,9 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/profile/', profile_view, name='profile'),
     path('api/profile/password/', change_password, name='change-password'),
+
+    path("api/logbook/", RouteLogListCreateView.as_view(), name="route-log-list"),
+    path("api/logbook/<int:log_id>/", RouteLogDetailView.as_view(), name="route-log-detail"),
     
     path('sectors/', SectorListView.as_view(), name='sector-list'),
     path('areas/', AreaListView.as_view(), name='area-list'),
