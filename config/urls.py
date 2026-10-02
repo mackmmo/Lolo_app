@@ -24,10 +24,18 @@ from guide.views import (
     RouteLogDetailView,
     password_reset_request,
     password_reset_confirm,
+    RouteTodoListCreateView,
+    RouteTodoDetailView,
+    RouteCommentListCreateView,
+    RouteCommentDetailView
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/comments/', RouteCommentListCreateView.as_view(), name='route-comment-list'),
+    path('api/comments/<int:comment_id>/', RouteCommentDetailView.as_view(), name='route-comment-detail'),
+    path('api/todos/', RouteTodoListCreateView.as_view(), name='route-todo-list'),
+    path('api/todos/<int:todo_id>/', RouteTodoDetailView.as_view(), name='route-todo-detail'),
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/profile/', profile_view, name='profile'),
     path('api/profile/password/', change_password, name='change-password'),
