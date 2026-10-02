@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from .models import Sector, Area, SubArea, Route, RouteLog
+from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo
 
 class SectorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -112,6 +112,49 @@ class RouteLogSerializer(serializers.ModelSerializer):
 
         read_only_fields = [
             "log_id",
+            "created_at",
+            "updated_at",
+        ]
+
+class RouteTodoSerializer(serializers.ModelSerializer):
+    route_name = serializers.CharField(source="route.name", read_only=True)
+    grade = serializers.CharField(source="route.grade", read_only=True)
+
+    class Meta:
+        model = RouteTodo
+        fields = [
+            "todo_id",
+            "route",
+            "route_name",
+            "grade",
+            "created_at",
+        ]
+        read_only_fields = [
+            "todo_id",
+            "created_at",
+        ]
+
+
+class RouteCommentSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username", read_only=True)
+    route_name = serializers.CharField(source="route.name", read_only=True)
+    grade = serializers.CharField(source="route.grade", read_only=True)
+
+    class Meta:
+        model = RouteComment
+        fields = [
+            "comment_id",
+            "route",
+            "route_name",
+            "grade",
+            "username",
+            "comment",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "comment_id",
+            "username",
             "created_at",
             "updated_at",
         ]
