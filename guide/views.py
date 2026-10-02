@@ -14,7 +14,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
 from django.http import HttpResponse
 from django.db import connection
-from .models import Sector, Area, SubArea, Route, RouteLog
+from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo
 from rest_framework.decorators import api_view, permission_classes
 
 
@@ -26,6 +26,8 @@ from .serializers import (
     RouteLogSerializer,
     RegisterSerializer,
     ChangePasswordSerializer,
+    RouteCommentSerializer,
+    RouteTodoSerializer,
 )
 
 from google.oauth2 import id_token
@@ -428,3 +430,63 @@ class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
             .filter(user=self.request.user)
             .select_related("route")
         )
+
+class RouteTodoListCreateView(generics.ListCreateAPIView):
+    serializer_class = RouteTodoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            RouteTodo.objects
+            .filter(user=self.request.user)
+            .select_related("route")
+            .order_by("-created_at")
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class RouteTodoDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = RouteTodoSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "todo_id"
+
+    def get_queryset(self):
+        return (
+            RouteTodo.objects
+            .filter(user=self.request.user)
+            .select_related("route")
+        )
+
+
+class RouteCommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = RouteCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = (
+            RouteComment.objects
+            .select_related("user", "route")
+            .order_by("-created_at")
+        )
+
+        route_id = self.request.query_params.get("route")
+
+        if route_id:
+            queryset = queryset.filter(route_id=route_id)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class RouteCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = RouteCommentSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "comment_id"
+
+    def get_queryset(self):
+        # A user can only edit/delete their OWN comments.
+        return RouteComment.objects.filter(user=self.request.user)
