@@ -1,15 +1,21 @@
 from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
 from django.http import HttpResponse
 from django.db import connection
 from .models import Sector, Area, SubArea, Route
-from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer
+from .serializers import SectorSerializer, AreaSerializer, SubAreaSerializer, RouteSerializer, RegisterSerializer
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
 class SectorListView(generics.ListAPIView):
     queryset = Sector.objects.all().order_by('sector_id')

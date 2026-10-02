@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 from guide.views import (
     RouteDetailView,
+    RegisterView,
     SectorListView,
     AreaListView,
     SubAreaListView,
@@ -21,6 +22,7 @@ from guide.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/register/', RegisterView.as_view(), name='register'),
     
     path('sectors/', SectorListView.as_view(), name='sector-list'),
     path('areas/', AreaListView.as_view(), name='area-list'),
