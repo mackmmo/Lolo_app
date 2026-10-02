@@ -16,6 +16,7 @@ from django.http import HttpResponse
 from django.db import connection
 from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo
 from rest_framework.decorators import api_view, permission_classes
+from django.db.models import Count
 
 
 from .serializers import (
