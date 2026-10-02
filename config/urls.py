@@ -18,6 +18,8 @@ from guide.views import (
     poi_tiles,
     trailhead_tiles,
     gate_tiles,
+    profile_view,
+    change_password,
 )
 
 urlpatterns = [
