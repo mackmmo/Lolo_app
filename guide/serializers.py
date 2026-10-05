@@ -168,5 +168,5 @@ class CommunityFeedSerializer(serializers.Serializer):
     grade = serializers.CharField(source="route.grade", read_only=True)
     send_style = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
-    send_date = serializers.DateField(read_only=True)
+    date_sent = serializers.DateField(read_only=True)
 
