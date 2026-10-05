@@ -15,11 +15,12 @@ import django_filters
 from django.http import HttpResponse
 from django.db import connection
 from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import APIView, api_view, permission_classes
 from django.db.models import Count
 
 
 from .serializers import (
+    CommunityFeedSerializer,
     SectorSerializer,
     AreaSerializer,
     SubAreaSerializer,
@@ -526,3 +527,10 @@ def route_community_stats(request, route_id):
         "flash": send_counts.get("flash", 0),
         "redpoint": send_counts.get("redpoint", 0),
     })
+
+class CommunityFeedView(APIView):
+
+    def get(self, request):
+        logs = RouteLog.objects.filter(status="sent")
+        serializer = CommunityFeedSerializer(logs, many=True)
+        return Response(serializer.data)

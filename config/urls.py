@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from guide.views import (
+    CommunityFeedView,
     RouteDetailView,
     RegisterView,
     SectorListView,
@@ -44,9 +45,9 @@ urlpatterns = [
     path("api/password-reset-confirm/", password_reset_confirm, name="password-reset-confirm"),
     path("api/logbook/", RouteLogListCreateView.as_view(), name="route-log-list"),
     path("api/logbook/<int:log_id>/", RouteLogDetailView.as_view(), name="route-log-detail"),
+    path("api/community-feed/", CommunityFeedView.as_view(), name="community-feed"),
 
     path("api/routes/<int:route_id>/community-stats/", route_community_stats, name="route-community-stats"),
-    
     path('sectors/', SectorListView.as_view(), name='sector-list'),
     path('areas/', AreaListView.as_view(), name='area-list'),
     path('api/', include('api.urls')),  # include API URLs
