@@ -1,10 +1,10 @@
 # Publication and competitions
 
-Profile has independent feed and leaderboard/Hall of Fame permissions. All public queries enforce them on the server; turning them off retains private logs. Existing users retain feed publication during migration, with leaderboard participation off. New users start with both off. Private beta, email and attempts are never published.
+Profile has independent feed and leaderboard/Hall of Fame permissions. All public queries enforce them on the server; turning them off retains private logs. Existing users retain feed publication during migration, with leaderboard participation off. Leaderboard sharing is opt-in. Migration 0003 is a compatibility placeholder and no longer enrolls users automatically. If its earlier version was already applied, existing saved permissions remain; users can change them in Profile. New users start with both off. Private beta, email and attempts are never published.
 
-JuntMasters uses America/Denver calendar years. A send needs date_sent; both its send date and immutable recorded_at must fall in the competition year. Each user/route/year is unique. Grade index is the point value; equal totals share rank. All-Time requires a date and counts each user/route once overall. The route guide supports another dated send plus editing/deleting annual history.
+JuntMasters uses America/Denver calendar years. A send needs date_sent; its Date sent determines the competition year, including backlogged sends. The time it was entered or updated does not affect eligibility. Each user/route/year is unique. Grade index is the point value; equal totals share rank. All-Time requires a date and counts each user/route once overall. The route guide supports another dated send plus editing/deleting annual history.
 
-Junts Hall of Fame shows rank-one finishers of completed seasons, including ties. Completed standings retain their points/ranks after archiving, and publication permission still controls visibility. Opting out hides an archived winner without promoting the next finisher.
+JuntMasters begins in 2026. Junts Hall of Fame shows rank-one finishers of completed seasons from 2026 onwards, including ties. Completed standings retain their points/ranks after archiving, and publication permission still controls visibility. Opting out hides an archived winner without promoting the next finisher.
 
 ## Deployment
 

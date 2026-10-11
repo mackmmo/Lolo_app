@@ -1,11 +1,12 @@
 """Calendar-year competitions and server-side publication controls."""
-from datetime import date, datetime
+from datetime import date
 from zoneinfo import ZoneInfo
 from django.utils import timezone
 from django.db import transaction
 from .models import CompetitionSend, RouteLog, JuntMastersSeason, JuntMastersStanding
 
 COMPETITION_ZONE = ZoneInfo("America/Denver")
+JUNTMASTERS_FIRST_YEAR = 2026
 
 
 def competition_today():
@@ -90,21 +91,23 @@ def live_leaderboard_entries(board, year):
     published = {"user__data_permissions__publish_leaderboards": True, "user__is_active": True}
     today = competition_today()
     sends = CompetitionSend.objects.filter(date_sent__lte=today, **published)
+    logs = RouteLog.objects.filter(status="sent", date_sent__isnull=False, date_sent__lte=today, **published)
     if board == "juntmasters":
-        start = datetime(year, 1, 1, tzinfo=COMPETITION_ZONE)
-        end = datetime(year + 1, 1, 1, tzinfo=COMPETITION_ZONE)
-        sends = sends.filter(year=year, date_sent__year=year, recorded_at__gte=start, recorded_at__lt=end)
+        if year < JUNTMASTERS_FIRST_YEAR:
+            return []
+        # The ascent date selects its season, including backlogged sends.
+        sends = sends.filter(year=year, date_sent__year=year)
+        # Read qualifying legacy logs too, even if their annual import was missed.
+        logs = logs.filter(date_sent__year=year)
     rows = list(sends.values_list("user_id", "user__username", "route_id", "route__grade_index"))
-    if board == "alltime":
-        # Dated legacy sends remain eligible even before annual logging was introduced.
-        rows.extend(RouteLog.objects.filter(status="sent", date_sent__isnull=False, date_sent__lte=today, **published).values_list("user_id", "user__username", "route_id", "route__grade_index"))
+    rows.extend(logs.values_list("user_id", "user__username", "route_id", "route__grade_index"))
     return rank_route_points(rows)
 
 
 @transaction.atomic
 def finalize_season(year):
-    if year >= competition_today().year:
-        raise ValueError("Only completed years can be archived.")
+    if year < JUNTMASTERS_FIRST_YEAR or year >= competition_today().year:
+        raise ValueError("Only completed JuntMasters seasons from 2026 onwards can be archived.")
     season, _ = JuntMastersSeason.objects.get_or_create(year=year)
     season = JuntMastersSeason.objects.select_for_update().get(pk=season.pk)
     if season.finalized_at is None:
@@ -133,13 +136,15 @@ def models_username_expression():
 
 
 def leaderboard_entries(board, year):
+    if board == "juntmasters" and year < JUNTMASTERS_FIRST_YEAR:
+        return []
     if board == "juntmasters" and year < competition_today().year:
         return archived_entries(finalize_season(year))
     return live_leaderboard_entries(board, year)
 
 
 def hall_of_fame():
-    years = set(CompetitionSend.objects.filter(year__lt=competition_today().year).values_list("year", flat=True))
-    years.update(JuntMastersSeason.objects.values_list("year", flat=True))
+    years = set(CompetitionSend.objects.filter(year__gte=JUNTMASTERS_FIRST_YEAR, year__lt=competition_today().year).values_list("year", flat=True))
+    years.update(JuntMastersSeason.objects.filter(year__gte=JUNTMASTERS_FIRST_YEAR, year__lt=competition_today().year).values_list("year", flat=True))
     return [{"year": year, "winners": archived_entries(finalize_season(year), winners_only=True)}
             for year in sorted(years, reverse=True)]

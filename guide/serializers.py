@@ -66,7 +66,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("password_confirm")
         user = User.objects.create_user(**validated_data)
-        UserDataPermissions.objects.create(user=user)
+        UserDataPermissions.objects.create(user=user, publish_feed=False, publish_leaderboards=False)
         return user
 
 class ChangePasswordSerializer(serializers.Serializer):

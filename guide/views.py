@@ -596,7 +596,7 @@ class CompetitionSendDetailView(generics.RetrieveUpdateDestroyAPIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def leaderboard_view(request):
-    from .competition import competition_today, leaderboard_entries
+    from .competition import competition_today, leaderboard_entries, JUNTMASTERS_FIRST_YEAR
     board = request.query_params.get("board", "juntmasters")
     if board not in {"juntmasters", "alltime"}:
         return Response({"detail": "Unknown leaderboard."}, status=400)
@@ -604,8 +604,9 @@ def leaderboard_view(request):
         year = int(request.query_params.get("year", competition_today().year))
     except (ValueError, TypeError):
         return Response({"detail": "Year must be a number."}, status=400)
-    if not 1900 <= year <= competition_today().year:
-        return Response({"detail": "Choose a valid current or past year."}, status=400)
+    first_year = JUNTMASTERS_FIRST_YEAR if board == "juntmasters" else 1900
+    if not first_year <= year <= competition_today().year:
+        return Response({"detail": "Choose a current or past competition year. JuntMasters starts in 2026."}, status=400)
     return Response({"board": board, "name": "JuntMasters" if board == "juntmasters" else "All-Time", "year": year if board == "juntmasters" else None, "entries": leaderboard_entries(board, year)})
 
 
