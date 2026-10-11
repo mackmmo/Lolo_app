@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo
+from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo, UserDataPermissions, CompetitionSend
 
 class SectorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,7 +65,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop("password_confirm")
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)
+        UserDataPermissions.objects.create(user=user)
+        return user
 
 class ChangePasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)
@@ -115,6 +117,12 @@ class RouteLogSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+    def validate_date_sent(self, value):
+        from .competition import competition_today
+        if value and value > competition_today():
+            raise serializers.ValidationError("A send cannot be dated in the future.")
+        return value
 
 class RouteTodoSerializer(serializers.ModelSerializer):
     route_name = serializers.CharField(source="route.name", read_only=True)
@@ -172,3 +180,28 @@ class CommunityFeedSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     date_sent = serializers.DateField(read_only=True)
 
+
+
+class DataPermissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserDataPermissions
+        fields = ["publish_feed", "publish_leaderboards"]
+
+
+class CompetitionSendSerializer(serializers.ModelSerializer):
+    route_name = serializers.CharField(source="route.name", read_only=True)
+    grade = serializers.CharField(source="route.grade", read_only=True)
+
+    class Meta:
+        model = CompetitionSend
+        fields = ["id", "route", "route_name", "grade", "year", "date_sent", "send_style", "recorded_at"]
+        read_only_fields = ["id", "year", "recorded_at"]
+
+    def validate(self, attrs):
+        from .competition import competition_today
+        if self.instance and "route" in attrs and attrs["route"].pk != self.instance.route_id:
+            raise serializers.ValidationError({"route": "Choose the route when creating a send. It cannot be changed afterwards."})
+        date_sent = attrs.get("date_sent", getattr(self.instance, "date_sent", None))
+        if date_sent and date_sent > competition_today():
+            raise serializers.ValidationError({"date_sent": "A send cannot be dated in the future."})
+        return attrs

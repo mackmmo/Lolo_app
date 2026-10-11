@@ -13,13 +13,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
 from django.http import HttpResponse
-from django.db import connection
-from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo
+from django.db import connection, transaction, IntegrityError
+from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo, UserDataPermissions, CompetitionSend
 from rest_framework.decorators import APIView, api_view, permission_classes
 from django.db.models import Count
 
 
 from .serializers import (
+    DataPermissionsSerializer,
+    CompetitionSendSerializer,
     CommunityFeedSerializer,
     SectorSerializer,
     AreaSerializer,
@@ -131,11 +133,18 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
-@api_view(["GET"])
+@api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
 def profile_view(request):
+    permissions, _ = UserDataPermissions.objects.get_or_create(user=request.user)
+    if request.method == "PATCH":
+        serializer = DataPermissionsSerializer(permissions, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
     return Response({
         "username": request.user.username,
         "email": request.user.email,
+        "data_permissions": DataPermissionsSerializer(permissions).data,
     })
 
 @api_view(["POST"])
@@ -409,6 +418,7 @@ def verify_google_token(request):
 
 class RouteLogListCreateView(generics.ListCreateAPIView):
     serializer_class = RouteLogSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return (
@@ -418,12 +428,16 @@ class RouteLogListCreateView(generics.ListCreateAPIView):
             .order_by("-updated_at")
         )
 
+    @transaction.atomic
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        from .competition import sync_competition_send
+        log = serializer.save(user=self.request.user)
+        sync_competition_send(log)
 
 
 class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RouteLogSerializer
+    permission_classes = [IsAuthenticated]
     lookup_field = "log_id"
 
     def get_queryset(self):
@@ -432,6 +446,14 @@ class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
             .filter(user=self.request.user)
             .select_related("route")
         )
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        from .competition import sync_competition_send
+        previous_year = serializer.instance.date_sent.year if serializer.instance.date_sent else None
+        log = serializer.save()
+        sync_competition_send(log, previous_year)
+
 
 class RouteTodoListCreateView(generics.ListCreateAPIView):
     serializer_class = RouteTodoSerializer
@@ -505,32 +527,90 @@ def route_community_stats(request, route_id):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    sent_logs = RouteLog.objects.filter(
-        route=route,
-        status="sent",
-    )
-
-    send_counts = {
-        row["send_style"]: row["count"]
-        for row in (
-            sent_logs
-            .exclude(send_style__isnull=True)
-            .values("send_style")
-            .annotate(count=Count("log_id"))
-        )
-    }
+    from collections import Counter
+    from .competition import public_feed_entries
+    entries = public_feed_entries(route_id)
+    send_counts = Counter(entry["send_style"] for entry in entries)
 
     return Response({
         "route": route.route_id,
-        "total_sends": sent_logs.count(),
+        "total_sends": len(entries),
         "onsight": send_counts.get("onsight", 0),
         "flash": send_counts.get("flash", 0),
         "redpoint": send_counts.get("redpoint", 0),
     })
 
 class CommunityFeedView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        logs = RouteLog.objects.filter(status="sent")
-        serializer = CommunityFeedSerializer(logs, many=True)
-        return Response(serializer.data)
+        from .competition import public_feed_entries
+        return Response(public_feed_entries())
+
+
+class CompetitionSendListCreateView(generics.ListCreateAPIView):
+    serializer_class = CompetitionSendSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return CompetitionSend.objects.filter(user=self.request.user).select_related("route")
+
+    def perform_create(self, serializer):
+        from rest_framework.exceptions import ValidationError as APIValidationError
+        date_sent = serializer.validated_data["date_sent"]
+        try:
+            with transaction.atomic():
+                serializer.save(user=self.request.user, year=date_sent.year)
+        except IntegrityError:
+            raise APIValidationError({"route": "This route is already logged for this year. Each route counts once per year."})
+
+
+class CompetitionSendDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CompetitionSendSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return CompetitionSend.objects.filter(user=self.request.user).select_related("route")
+
+    def perform_update(self, serializer):
+        from rest_framework.exceptions import ValidationError as APIValidationError
+        date_sent = serializer.validated_data.get("date_sent", serializer.instance.date_sent)
+        try:
+            with transaction.atomic():
+                send = serializer.save(year=date_sent.year)
+                if send.source_log_id:
+                    RouteLog.objects.filter(pk=send.source_log_id, user=self.request.user).update(
+                        date_sent=send.date_sent, send_style=send.send_style, status="sent")
+        except IntegrityError:
+            raise APIValidationError({"route": "This route is already logged for this year."})
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            if instance.source_log_id:
+                # Keep private attempts/beta while removing the published send.
+                RouteLog.objects.filter(pk=instance.source_log_id, user=self.request.user).update(
+                    status="project", date_sent=None, send_style=None)
+            instance.delete()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def leaderboard_view(request):
+    from .competition import competition_today, leaderboard_entries
+    board = request.query_params.get("board", "juntmasters")
+    if board not in {"juntmasters", "alltime"}:
+        return Response({"detail": "Unknown leaderboard."}, status=400)
+    try:
+        year = int(request.query_params.get("year", competition_today().year))
+    except (ValueError, TypeError):
+        return Response({"detail": "Year must be a number."}, status=400)
+    if not 1900 <= year <= competition_today().year:
+        return Response({"detail": "Choose a valid current or past year."}, status=400)
+    return Response({"board": board, "name": "JuntMasters" if board == "juntmasters" else "All-Time", "year": year if board == "juntmasters" else None, "entries": leaderboard_entries(board, year)})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def hall_of_fame_view(request):
+    from .competition import hall_of_fame
+    return Response({"name": "Junts Hall of Fame", "seasons": hall_of_fame()})

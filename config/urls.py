@@ -5,6 +5,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from guide.views import (
+    leaderboard_view,
+    hall_of_fame_view,
+    CompetitionSendListCreateView,
+    CompetitionSendDetailView,
     CommunityFeedView,
     RouteDetailView,
     RegisterView,
@@ -33,6 +37,10 @@ from guide.views import (
 )
 
 urlpatterns = [
+    path("api/hall-of-fame/", hall_of_fame_view, name="hall-of-fame"),
+    path("api/leaderboards/", leaderboard_view, name="leaderboards"),
+    path("api/competition-sends/", CompetitionSendListCreateView.as_view(), name="competition-send-list"),
+    path("api/competition-sends/<int:pk>/", CompetitionSendDetailView.as_view(), name="competition-send-detail"),
     path('admin/', admin.site.urls),
     path('api/comments/', RouteCommentListCreateView.as_view(), name='route-comment-list'),
     path('api/comments/<int:comment_id>/', RouteCommentDetailView.as_view(), name='route-comment-detail'),

@@ -191,3 +191,38 @@ class RouteComment(models.Model):
     class Meta:
         db_table = "route_comment"
         managed = False
+
+class UserDataPermissions(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="data_permissions")
+    publish_feed = models.BooleanField(default=False)
+    publish_leaderboards = models.BooleanField(default=False)
+
+
+class CompetitionSend(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="competition_sends")
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="competition_sends")
+    source_log = models.ForeignKey(RouteLog, on_delete=models.CASCADE, null=True, blank=True, related_name="competition_sends")
+    year = models.PositiveIntegerField()
+    date_sent = models.DateField()
+    send_style = models.CharField(max_length=20, choices=RouteLog.SEND_STYLE_CHOICES, null=True, blank=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "route", "year"], name="unique_competition_send_per_year")]
+        ordering = ["-date_sent", "-recorded_at"]
+
+
+class JuntMastersSeason(models.Model):
+    year = models.PositiveIntegerField(unique=True)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+
+
+class JuntMastersStanding(models.Model):
+    season = models.ForeignKey(JuntMastersSeason, on_delete=models.CASCADE, related_name="standings")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rank = models.PositiveIntegerField()
+    points = models.IntegerField()
+    route_count = models.PositiveIntegerField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["season", "user"], name="unique_juntmasters_season_user")]
