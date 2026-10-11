@@ -163,6 +163,8 @@ class RouteCommentSerializer(serializers.ModelSerializer):
 
 class CommunityFeedSerializer(serializers.Serializer):
 
+    route_id = serializers.IntegerField(source="route.route_id", read_only=True)
+
     username = serializers.CharField(source="user.username", read_only=True)
     route_name = serializers.CharField(source="route.name", read_only=True)
     grade = serializers.CharField(source="route.grade", read_only=True)
