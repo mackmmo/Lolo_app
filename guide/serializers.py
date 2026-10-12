@@ -205,3 +205,15 @@ class CompetitionSendSerializer(serializers.ModelSerializer):
         if date_sent and date_sent > competition_today():
             raise serializers.ValidationError({"date_sent": "A send cannot be dated in the future."})
         return attrs
+
+
+class ProfileUsernameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
+
+    def validate_username(self, value):
+        others = User.objects.filter(username__iexact=value).exclude(pk=self.instance.pk)
+        if others.exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value

@@ -21,6 +21,7 @@ from django.db.models import Count
 
 from .serializers import (
     DataPermissionsSerializer,
+    ProfileUsernameSerializer,
     CompetitionSendSerializer,
     CommunityFeedSerializer,
     SectorSerializer,
@@ -140,7 +141,15 @@ def profile_view(request):
     if request.method == "PATCH":
         serializer = DataPermissionsSerializer(permissions, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        username_serializer = ProfileUsernameSerializer(request.user, data=request.data, partial=True)
+        username_serializer.is_valid(raise_exception=True)
+        try:
+            with transaction.atomic():
+                if "username" in request.data:
+                    username_serializer.save()
+                serializer.save()
+        except IntegrityError:
+            return Response({"username": ["This username is already taken."]}, status=status.HTTP_400_BAD_REQUEST)
     return Response({
         "username": request.user.username,
         "email": request.user.email,
