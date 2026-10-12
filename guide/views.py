@@ -624,3 +624,25 @@ def leaderboard_view(request):
 def hall_of_fame_view(request):
     from .competition import hall_of_fame
     return Response({"name": "Junts Hall of Fame", "seasons": hall_of_fame()})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def leaderboard_routes_view(request, user_id):
+    from .competition import competition_today, JUNTMASTERS_FIRST_YEAR, scored_routes
+    board = request.query_params.get("board", "juntmasters")
+    if board not in {"juntmasters", "alltime"}:
+        return Response({"detail": "Unknown leaderboard."}, status=400)
+    try:
+        year = int(request.query_params.get("year", competition_today().year))
+    except (ValueError, TypeError):
+        return Response({"detail": "Year must be a number."}, status=400)
+    if not (JUNTMASTERS_FIRST_YEAR if board == "juntmasters" else 1900) <= year <= competition_today().year:
+        return Response({"detail": "Choose a valid competition year."}, status=400)
+    user = User.objects.filter(pk=user_id, is_active=True, data_permissions__publish_leaderboards=True).first()
+    if user is None:
+        return Response({"detail": "This climber's leaderboard routes are not public."}, status=404)
+    routes = scored_routes(board, year, user_id)
+    return Response({"user_id": user.pk, "username": user.username, "board": board,
+        "year": year if board == "juntmasters" else None, "routes": routes,
+        "points": sum(route["points"] for route in routes), "route_count": len(routes)})

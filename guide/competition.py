@@ -87,21 +87,48 @@ def rank_route_points(rows):
     return entries
 
 
-def live_leaderboard_entries(board, year):
+def eligible_send_records(board, year, user_id=None):
     published = {"user__data_permissions__publish_leaderboards": True, "user__is_active": True}
     today = competition_today()
     sends = CompetitionSend.objects.filter(date_sent__lte=today, **published)
     logs = RouteLog.objects.filter(status="sent", date_sent__isnull=False, date_sent__lte=today, **published)
+    if user_id is not None:
+        sends = sends.filter(user_id=user_id)
+        logs = logs.filter(user_id=user_id)
     if board == "juntmasters":
         if year < JUNTMASTERS_FIRST_YEAR:
-            return []
-        # The ascent date selects its season, including backlogged sends.
+            return sends.none(), logs.none()
         sends = sends.filter(year=year, date_sent__year=year)
-        # Read qualifying legacy logs too, even if their annual import was missed.
         logs = logs.filter(date_sent__year=year)
+    return sends, logs
+
+
+def live_leaderboard_entries(board, year):
+    sends, logs = eligible_send_records(board, year)
     rows = list(sends.values_list("user_id", "user__username", "route_id", "route__grade_index"))
     rows.extend(logs.values_list("user_id", "user__username", "route_id", "route__grade_index"))
     return rank_route_points(rows)
+
+
+def live_scored_routes(board, year, user_id):
+    sends, logs = eligible_send_records(board, year, user_id)
+    by_route = {}
+    records = list(sends.select_related("route")) + list(logs.select_related("route"))
+    for send in sorted(records, key=lambda item: item.date_sent):
+        if send.route_id in by_route:
+            continue
+        by_route[send.route_id] = {"route_id": send.route_id, "route_name": send.route.name,
+            "grade": send.route.grade, "points": send.route.grade_index or 0,
+            "date_sent": send.date_sent.isoformat(), "send_style": send.send_style}
+    return sorted(by_route.values(), key=lambda item: (-item["points"], item["route_name"].casefold()))
+
+
+def scored_routes(board, year, user_id):
+    if board == "juntmasters" and year < competition_today().year:
+        season = finalize_season(year)
+        standing = season.standings.filter(user_id=user_id).first()
+        return standing.scored_routes if standing else []
+    return live_scored_routes(board, year, user_id)
 
 
 @transaction.atomic
@@ -114,7 +141,8 @@ def finalize_season(year):
         entries = live_leaderboard_entries("juntmasters", year)
         JuntMastersStanding.objects.bulk_create([
             JuntMastersStanding(season=season, user_id=entry["user_id"], rank=entry["rank"],
-                               points=entry["points"], route_count=entry["route_count"])
+                               points=entry["points"], route_count=entry["route_count"],
+                               scored_routes=live_scored_routes("juntmasters", year, entry["user_id"]))
             for entry in entries
         ])
         season.finalized_at = timezone.now()

@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 from guide.views import (
     leaderboard_view,
+    leaderboard_routes_view,
     hall_of_fame_view,
     CompetitionSendListCreateView,
     CompetitionSendDetailView,
@@ -39,6 +40,7 @@ from guide.views import (
 urlpatterns = [
     path("api/hall-of-fame/", hall_of_fame_view, name="hall-of-fame"),
     path("api/leaderboards/", leaderboard_view, name="leaderboards"),
+    path("api/leaderboards/users/<int:user_id>/routes/", leaderboard_routes_view, name="leaderboard-routes"),
     path("api/competition-sends/", CompetitionSendListCreateView.as_view(), name="competition-send-list"),
     path("api/competition-sends/<int:pk>/", CompetitionSendDetailView.as_view(), name="competition-send-detail"),
     path('admin/', admin.site.urls),

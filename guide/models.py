@@ -86,6 +86,7 @@ class RouteLog(models.Model):
         ("flash", "Flash"),
         ("redpoint", "Redpoint"),
         ("pinkpoint", "Pinkpoint"),
+        ("repeat", "Repeat"),
     ]
 
     log_id = models.BigAutoField(primary_key=True)
@@ -223,6 +224,7 @@ class JuntMastersStanding(models.Model):
     rank = models.PositiveIntegerField()
     points = models.IntegerField()
     route_count = models.PositiveIntegerField()
+    scored_routes = models.JSONField(default=list)
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["season", "user"], name="unique_juntmasters_season_user")]
