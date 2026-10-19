@@ -8,7 +8,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from rest_framework import status
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermissions, SAFE_METHODS
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
@@ -86,6 +86,12 @@ def password_reset_request(request):
 
     return Response(response_message)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def editor_status(request):
+    return Response({
+        "is_staff": request.user.is_staff
+    })
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -163,6 +169,8 @@ def change_password(request):
     request.user.set_password(serializer.validated_data["new_password"])
     request.user.save(update_fields=["password"])
     return Response({"detail": "Password updated successfully."})
+
+class 
 
 class SectorListView(generics.ListAPIView):
     queryset = Sector.objects.all().order_by('sector_id')

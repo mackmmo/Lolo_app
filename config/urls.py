@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from guide.views import (
+    editor_status,
     leaderboard_view,
     leaderboard_routes_view,
     hall_of_fame_view,
@@ -34,7 +35,8 @@ from guide.views import (
     RouteTodoDetailView,
     RouteCommentListCreateView,
     RouteCommentDetailView,
-    route_community_stats
+    route_community_stats,
+    editor_status
 )
 
 urlpatterns = [
@@ -64,6 +66,7 @@ urlpatterns = [
     path('subareas/', SubAreaListView.as_view(), name='subarea-list'),
     path('routes/', RouteListView.as_view(), name='route-list'),
     path('routes/<int:pk>/', RouteDetailView.as_view(), name='route-detail'),
+    path('api/editor-status/', editor_status, name="editor-status")
     
     path("tiles/area-labels/<int:z>/<int:x>/<int:y>.mvt", area_label_tiles, name="area-label-tiles"),
     path("tiles/areas/<int:z>/<int:x>/<int:y>.mvt", area_tiles, name="area-tiles"),
