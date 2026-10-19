@@ -170,8 +170,6 @@ def change_password(request):
     request.user.save(update_fields=["password"])
     return Response({"detail": "Password updated successfully."})
 
-class 
-
 class SectorListView(generics.ListAPIView):
     queryset = Sector.objects.all().order_by('sector_id')
     serializer_class = SectorSerializer
