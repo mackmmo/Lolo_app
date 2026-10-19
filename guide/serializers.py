@@ -15,25 +15,41 @@ class RouteSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Route
-        fields = ['route_id',
-                  'area_name',
-                  'subarea_name',
-                  'area',
-                  'crag_order', 
-                  'centroid', 
-                  'name', 
-                  'type', 
-                  'description', 
-                  'grade', 
-                  'subarea',    
-                  'danger_rating', 
-                  'star_rating', 
-                  'centroid', 
-                  'height', 
-                  'first_ascencionist', 
-                  'fa_year',
-                  'pro']
 
+        fields = [
+            'name', 
+            'type', 
+            'description', 
+            'grade',                      
+            'danger_rating', 
+            'star_rating',                  
+            'height', 
+            'first_ascencionist', 
+            'fa_year',
+            'pro',
+            'star_rating',
+            'area_name',
+            'subarea_name',
+            'area',
+            'crag_order',
+            'centroid',
+            'subarea',
+            'centroid',
+            'route_id',
+            ]
+            
+        read_only_fields = [
+            'star_rating',
+            'area_name',
+            'subarea_name',
+            'area',
+            'crag_order',
+            'centroid',
+            'subarea',
+            'centroid',
+            'route_id',
+            ]
+            
 class AreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Area
