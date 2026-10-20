@@ -4,7 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 
 from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo, UserDataPermissions, CompetitionSend
 
-from utils import GRADE_MAP
+from .utils import GRADE_MAP
 
 class SectorSerializer(serializers.ModelSerializer):
     class Meta:
