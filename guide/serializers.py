@@ -35,7 +35,7 @@ class RouteSerializer(serializers.ModelSerializer):
             'subarea',
             'centroid',
             'route_id',
-            'star_rating'
+            'star_rating',
             'grade_index'
             ]
             
