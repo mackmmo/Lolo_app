@@ -4,6 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 
 from .models import Sector, Area, SubArea, Route, RouteLog, RouteComment, RouteTodo, UserDataPermissions, CompetitionSend
 
+from utils import GRADE_MAP
+
 class SectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sector
@@ -12,7 +14,7 @@ class SectorSerializer(serializers.ModelSerializer):
 class RouteSerializer(serializers.ModelSerializer):
     area_name = serializers.CharField(source="area.name", read_only=True)
     subarea_name = serializers.CharField(source="subarea.name", read_only=True)
-    
+
     class Meta:
         model = Route
 
@@ -21,25 +23,23 @@ class RouteSerializer(serializers.ModelSerializer):
             'type', 
             'description', 
             'grade',                      
-            'danger_rating', 
-            'star_rating',                  
+            'danger_rating',                  
             'height', 
             'first_ascencionist', 
             'fa_year',
             'pro',
-            'star_rating',
             'area_name',
             'subarea_name',
             'area',
             'crag_order',
-            'centroid',
             'subarea',
             'centroid',
             'route_id',
+            'star_rating'
+            'grade_index'
             ]
             
         read_only_fields = [
-            'star_rating',
             'area_name',
             'subarea_name',
             'area',
@@ -48,8 +48,25 @@ class RouteSerializer(serializers.ModelSerializer):
             'subarea',
             'centroid',
             'route_id',
+            'grade_index'
             ]
+
             
+    def validate_grade(self, value):
+        if value not in GRADE_MAP:
+            raise serializers.ValidationError("You crazy? This don't exist!")
+
+        return value
+
+    def update(self, instance, validated_data):
+        new_grade = validated_data.get("grade")
+
+        if instance.grade != new_grade and new_grade is not None:
+            instance.grade = new_grade
+            instance.grade_index = GRADE_MAP.get(new_grade)
+
+        return super().update(instance, validated_data)
+
 class AreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Area
