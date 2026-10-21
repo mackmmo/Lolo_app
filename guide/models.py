@@ -64,7 +64,7 @@ class Route(models.Model):
 
     centroid = geomodels.PointField(srid=3857)
     height = models.IntegerField()
-    first_ascencionist = models.CharField(max_length=100)
+    first_ascensionist = models.CharField(max_length=100)
     fa_year = models.IntegerField() 
     grade_index = models.IntegerField()
     class Meta:

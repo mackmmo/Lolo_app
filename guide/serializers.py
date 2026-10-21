@@ -27,7 +27,7 @@ class RouteSerializer(serializers.ModelSerializer):
                   'star_rating', 
                   'centroid', 
                   'height', 
-                  'first_ascencionist', 
+                  'first_ascensionist', 
                   'fa_year']
 
 class AreaSerializer(serializers.ModelSerializer):
