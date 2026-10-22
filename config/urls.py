@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from guide.views import (
+    offline_status,
     editor_status,
     leaderboard_view,
     leaderboard_routes_view,
@@ -40,6 +41,7 @@ from guide.views import (
 )
 
 urlpatterns = [
+    path("api/offline-status/", offline_status, name="offline-status"),
     path("api/hall-of-fame/", hall_of_fame_view, name="hall-of-fame"),
     path("api/leaderboards/", leaderboard_view, name="leaderboards"),
     path("api/leaderboards/users/<int:user_id>/routes/", leaderboard_routes_view, name="leaderboard-routes"),
