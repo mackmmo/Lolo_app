@@ -34,6 +34,7 @@ from .serializers import (
     RouteCommentSerializer,
     RouteTodoSerializer,
 )
+from .offline import OfflineWriteMixin
 
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -92,6 +93,14 @@ def editor_status(request):
     return Response({
         "is_staff": request.user.is_staff
     })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def offline_status(request):
+    from .models import OfflineReceipt
+    ready = OfflineReceipt._meta.db_table in connection.introspection.table_names()
+    return Response({"protocol": 1 if ready else 0, "user_id": request.user.pk})
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -440,7 +449,7 @@ def verify_google_token(request):
         # Invalid token
         return Response({'error': 'Invalid token'}, status=400)
 
-class RouteLogListCreateView(generics.ListCreateAPIView):
+class RouteLogListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = RouteLogSerializer
     permission_classes = [IsAuthenticated]
 
@@ -459,7 +468,7 @@ class RouteLogListCreateView(generics.ListCreateAPIView):
         sync_competition_send(log)
 
 
-class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
+class RouteLogDetailView(OfflineWriteMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RouteLogSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "log_id"
@@ -479,7 +488,7 @@ class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
         sync_competition_send(log, previous_year)
 
 
-class RouteTodoListCreateView(generics.ListCreateAPIView):
+class RouteTodoListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = RouteTodoSerializer
     permission_classes = [IsAuthenticated]
 
@@ -495,7 +504,7 @@ class RouteTodoListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class RouteTodoDetailView(generics.RetrieveDestroyAPIView):
+class RouteTodoDetailView(OfflineWriteMixin, generics.RetrieveDestroyAPIView):
     serializer_class = RouteTodoSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "todo_id"
@@ -508,7 +517,7 @@ class RouteTodoDetailView(generics.RetrieveDestroyAPIView):
         )
 
 
-class RouteCommentListCreateView(generics.ListCreateAPIView):
+class RouteCommentListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = RouteCommentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -530,7 +539,7 @@ class RouteCommentListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class RouteCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+class RouteCommentDetailView(OfflineWriteMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RouteCommentSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "comment_id"
@@ -572,7 +581,7 @@ class CommunityFeedView(APIView):
         return Response(public_feed_entries())
 
 
-class CompetitionSendListCreateView(generics.ListCreateAPIView):
+class CompetitionSendListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = CompetitionSendSerializer
     permission_classes = [IsAuthenticated]
 
@@ -589,7 +598,7 @@ class CompetitionSendListCreateView(generics.ListCreateAPIView):
             raise APIValidationError({"route": "This route is already logged for this year. Each route counts once per year."})
 
 
-class CompetitionSendDetailView(generics.RetrieveUpdateDestroyAPIView):
+class CompetitionSendDetailView(OfflineWriteMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CompetitionSendSerializer
     permission_classes = [IsAuthenticated]
 
