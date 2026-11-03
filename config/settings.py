@@ -175,6 +175,5 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 FRONTEND_URL = os.environ.get(
     "FRONTEND_URL",
-    "https://lologuide-webapp.onrender.com",
     "https://www.loloexplorer.com",
 )
