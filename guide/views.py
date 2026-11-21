@@ -8,7 +8,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from rest_framework import status
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, BasePermission, SAFE_METHODS
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import django_filters
@@ -34,6 +34,7 @@ from .serializers import (
     RouteCommentSerializer,
     RouteTodoSerializer,
 )
+from .offline import OfflineWriteMixin
 
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -86,6 +87,20 @@ def password_reset_request(request):
 
     return Response(response_message)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def editor_status(request):
+    return Response({
+        "is_staff": request.user.is_staff
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def offline_status(request):
+    from .models import OfflineReceipt
+    ready = OfflineReceipt._meta.db_table in connection.introspection.table_names()
+    return Response({"protocol": 1 if ready else 0, "user_id": request.user.pk})
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -182,11 +197,24 @@ class SubAreaListView(generics.ListAPIView):
     queryset = SubArea.objects.all().order_by('subarea_id')
     serializer_class = SubAreaSerializer
 
+<<<<<<< HEAD
 class RouteDetailView(generics.RetrieveAPIView):
     authentication_classes = []
     permission_classes = [AllowAny]
+=======
+class IsStaffOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return request.user.is_authenticated
+        
+        return request.user.is_authenticated and request.user.is_staff
+
+class RouteDetailView(generics.RetrieveUpdateAPIView):
+>>>>>>> 1300c8a9dff492dea2fa823d215f8f044961e46c
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
+    permission_classes = [IsStaffOrReadOnly]
+
 
 class RouteFilter(django_filters.FilterSet):
     min_grade = django_filters.NumberFilter(field_name="grade_index", lookup_expr="gte")
@@ -435,7 +463,7 @@ def verify_google_token(request):
         # Invalid token
         return Response({'error': 'Invalid token'}, status=400)
 
-class RouteLogListCreateView(generics.ListCreateAPIView):
+class RouteLogListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = RouteLogSerializer
     permission_classes = [IsAuthenticated]
 
@@ -454,7 +482,7 @@ class RouteLogListCreateView(generics.ListCreateAPIView):
         sync_competition_send(log)
 
 
-class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
+class RouteLogDetailView(OfflineWriteMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RouteLogSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "log_id"
@@ -474,7 +502,7 @@ class RouteLogDetailView(generics.RetrieveUpdateDestroyAPIView):
         sync_competition_send(log, previous_year)
 
 
-class RouteTodoListCreateView(generics.ListCreateAPIView):
+class RouteTodoListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = RouteTodoSerializer
     permission_classes = [IsAuthenticated]
 
@@ -490,7 +518,7 @@ class RouteTodoListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class RouteTodoDetailView(generics.RetrieveDestroyAPIView):
+class RouteTodoDetailView(OfflineWriteMixin, generics.RetrieveDestroyAPIView):
     serializer_class = RouteTodoSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "todo_id"
@@ -503,7 +531,7 @@ class RouteTodoDetailView(generics.RetrieveDestroyAPIView):
         )
 
 
-class RouteCommentListCreateView(generics.ListCreateAPIView):
+class RouteCommentListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = RouteCommentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -525,7 +553,7 @@ class RouteCommentListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class RouteCommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+class RouteCommentDetailView(OfflineWriteMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RouteCommentSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "comment_id"
@@ -567,7 +595,7 @@ class CommunityFeedView(APIView):
         return Response(public_feed_entries())
 
 
-class CompetitionSendListCreateView(generics.ListCreateAPIView):
+class CompetitionSendListCreateView(OfflineWriteMixin, generics.ListCreateAPIView):
     serializer_class = CompetitionSendSerializer
     permission_classes = [IsAuthenticated]
 
@@ -584,7 +612,7 @@ class CompetitionSendListCreateView(generics.ListCreateAPIView):
             raise APIValidationError({"route": "This route is already logged for this year. Each route counts once per year."})
 
 
-class CompetitionSendDetailView(generics.RetrieveUpdateDestroyAPIView):
+class CompetitionSendDetailView(OfflineWriteMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CompetitionSendSerializer
     permission_classes = [IsAuthenticated]
 

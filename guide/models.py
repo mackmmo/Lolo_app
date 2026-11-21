@@ -75,6 +75,18 @@ class Route(models.Model):
 
 from django.contrib.auth.models import User
 
+
+class OfflineReceipt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    request_id = models.UUIDField()
+    fingerprint = models.CharField(max_length=64)
+    status = models.PositiveSmallIntegerField()
+    response = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "request_id"], name="unique_offline_request")]
+
 class RouteLog(models.Model):
     STATUS_CHOICES = [
         ("project", "Project"),
