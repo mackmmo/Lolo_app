@@ -197,20 +197,14 @@ class SubAreaListView(generics.ListAPIView):
     queryset = SubArea.objects.all().order_by('subarea_id')
     serializer_class = SubAreaSerializer
 
-<<<<<<< HEAD
-class RouteDetailView(generics.RetrieveAPIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
-=======
 class IsStaffOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
-            return request.user.is_authenticated
-        
+            return True
+
         return request.user.is_authenticated and request.user.is_staff
 
 class RouteDetailView(generics.RetrieveUpdateAPIView):
->>>>>>> 1300c8a9dff492dea2fa823d215f8f044961e46c
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
     permission_classes = [IsStaffOrReadOnly]
