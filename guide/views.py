@@ -165,18 +165,26 @@ def change_password(request):
     return Response({"detail": "Password updated successfully."})
 
 class SectorListView(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     queryset = Sector.objects.all().order_by('sector_id')
     serializer_class = SectorSerializer
 
 class AreaListView(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     queryset = Area.objects.all().order_by('area_id')
     serializer_class = AreaSerializer
 
 class SubAreaListView(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     queryset = SubArea.objects.all().order_by('subarea_id')
     serializer_class = SubAreaSerializer
 
 class RouteDetailView(generics.RetrieveAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
 
@@ -193,6 +201,8 @@ class RouteFilter(django_filters.FilterSet):
         fields = ["sector", "area", "subarea", "type"]
 
 class RouteListView(generics.ListAPIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     queryset = Route.objects.all().order_by("route_id")
     serializer_class = RouteSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
